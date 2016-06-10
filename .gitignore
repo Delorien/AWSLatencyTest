@@ -67,3 +67,4 @@ buildNumber.properties
 
 ### Of Project ###
 *.txt
+resources/latency_test.properties

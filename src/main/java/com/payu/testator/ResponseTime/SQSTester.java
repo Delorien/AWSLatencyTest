@@ -5,6 +5,7 @@ import static com.amazonaws.regions.Regions.US_EAST_1;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,19 +22,14 @@ import com.amazonaws.services.sqs.model.SendMessageResult;
 
 public class SQSTester {
 
-	private static final String QUEUEURL = "https://sqs.us-east-1.amazonaws.com/817345971784/DEV-rackspace-test";
+	private static final String QUEUEURL = PropertiesLoader.get(PropertieKeys.QUEUEURL.getKey());
+	private static final String DEFAULT_AMOUNT = "5";
 
 	private final Logger logger = LoggerFactory.getLogger(SQSTester.class);
 
-	private int amountOfTests;
-
-	public void run(int amountOfTests) {
-		this.amountOfTests = amountOfTests;
-
+	public void run() {
 		Optional<AWSCredentials> credentials = new AWSHelper().getCredentials();
-
 		credentials.ifPresent(c -> writeTest(AmazonSQSClientBuilder.build(c, s -> s.setRegion(getRegion(US_EAST_1)))));
-
 	}
 
 	private void writeTest(AmazonSQSClient amazonSQSClient) {
@@ -44,11 +40,21 @@ public class SQSTester {
 		logger.info("===========================================\n");
 
 		try {
-			String testResponses = Stream.generate(() -> sendOneTestMessage(amazonSQSClient)).limit(amountOfTests)
-					.collect(Collectors.joining("\n"));
+
+			String amount = Optional.ofNullable(PropertiesLoader.get(PropertieKeys.QUEUE_AMOUNT_TEST.getKey()))
+					.filter(s -> !s.isEmpty()).orElse(DEFAULT_AMOUNT);
+
+			List<SQSResponse> results = Stream.generate(() -> sendOneTestMessage(amazonSQSClient))
+					.limit(Long.valueOf(amount)).collect(Collectors.toList());
+
+			String testResponses = results.stream().map(Object::toString).collect(Collectors.joining("\n"));
+			testResponses += "\nAvarage = "
+					+ results.stream().mapToDouble(r -> r.getDuration().toMillis()).average().orElse(0.0);
+
 			logger.info(testResponses);
 			FileHelper.write(testResponses);
 
+			logger.info("writing tests successfully completed.");
 		} catch (AmazonServiceException ase) {
 			logger.error("Error Message:    " + ase.getMessage());
 			logger.error("HTTP Status Code: " + ase.getStatusCode());
@@ -62,12 +68,11 @@ public class SQSTester {
 		}
 	}
 
-	private String sendOneTestMessage(AmazonSQSClient amazonSQSClient) {
+	private SQSResponse sendOneTestMessage(AmazonSQSClient amazonSQSClient) {
 		Instant start = Instant.now();
-		SendMessageResult sendMessage = amazonSQSClient
+		SendMessageResult messageResult = amazonSQSClient
 				.sendMessage(new SendMessageRequest(QUEUEURL, "Testing response delay."));
 		Instant end = Instant.now();
-		Duration duration = Duration.between(start, end);
-		return "Message Id: " + sendMessage.getMessageId() + " - Duration on milliseconds : " + duration.toMillis();
+		return new SQSResponse(messageResult, Duration.between(start, end));
 	}
 }

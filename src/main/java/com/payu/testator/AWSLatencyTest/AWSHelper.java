@@ -1,4 +1,4 @@
-package com.payu.testator.ResponseTime;
+package com.payu.testator.AWSLatencyTest;
 
 import java.util.Optional;
 import org.slf4j.Logger;

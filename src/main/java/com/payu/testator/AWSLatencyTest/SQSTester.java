@@ -1,8 +1,8 @@
-package com.payu.testator.ResponseTime;
+package com.payu.testator.AWSLatencyTest;
 
 import static com.amazonaws.regions.Region.getRegion;
 import static com.amazonaws.regions.Regions.US_EAST_1;
-import static com.payu.testator.ResponseTime.PropertieKeys.QUEUE_AMOUNT_TEST;
+import static com.payu.testator.AWSLatencyTest.PropertieKeys.QUEUE_AMOUNT_TEST;
 
 import java.time.Duration;
 import java.time.Instant;

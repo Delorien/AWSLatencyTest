@@ -16,12 +16,13 @@ public class FileHelper {
 
 	static void write(String content) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-MMM-uuuu HH:mm:ss");
-
 		String file = "SQS_write_test_" + formatter.format(LocalDateTime.now()) + ".txt";
+		logger.info("Writing result file {} ", file);
 		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(file))) {
 			writer.write(content);
 		} catch (IOException e) {
 			logger.error("Error on write response test file. ", e);
 		}
+		logger.info("success to write file.");
 	}
 }

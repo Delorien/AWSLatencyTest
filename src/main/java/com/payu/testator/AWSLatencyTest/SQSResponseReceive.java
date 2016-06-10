@@ -4,18 +4,13 @@ import java.time.Duration;
 
 import com.amazonaws.services.sqs.model.Message;
 
-public class SQSReceiveResponse {
+public class SQSResponseReceive extends SQSResponse {
 
 	private Message message;
-	private Duration duration;
 
-	public SQSReceiveResponse(Message message, Duration duration) {
+	public SQSResponseReceive(Message message, Duration duration) {
+		super(duration);
 		this.message = message;
-		this.duration = duration;
-	}
-
-	public Duration getDuration() {
-		return duration;
 	}
 
 	public Message getMessage() {

@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,7 +44,8 @@ public class SQSTester {
 		logger.info("===========================================\n");
 
 		Optional<AWSCredentials> credentials = new AWSHelper().getCredentials();
-		credentials.ifPresent(c -> writeTest(AmazonSQSClientBuilder.build(c, s -> s.setRegion(getRegion(US_EAST_1)))));
+		credentials.ifPresent(c -> executeTest(
+				() -> sendOneTestMessage(AmazonSQSClientBuilder.build(c, s -> s.setRegion(getRegion(US_EAST_1))))));
 	}
 
 	public void runReceiveTest() {
@@ -53,21 +55,21 @@ public class SQSTester {
 		logger.info("===========================================\n");
 
 		Optional<AWSCredentials> credentials = new AWSHelper().getCredentials();
-		credentials
-				.ifPresent(c -> receiveTest(AmazonSQSClientBuilder.build(c, s -> s.setRegion(getRegion(US_EAST_1)))));
+		credentials.ifPresent(c -> executeTest(
+				() -> requestOneTestMessage(AmazonSQSClientBuilder.build(c, s -> s.setRegion(getRegion(US_EAST_1))))));
 	}
 
-	private void receiveTest(AmazonSQSClient amazonSQSClient) {
+	private void executeTest(Supplier<SQSResponse> supplier) {
 
 		try {
-			List<SQSReceiveResponse> results = Stream.generate(() -> requestOneTestMessage(amazonSQSClient))
-					.limit(AMOUNT).collect(Collectors.toList());
+			List<SQSResponse> results = Stream.generate(supplier).limit(AMOUNT).collect(Collectors.toList());
+
 			String testResponses = results.stream().map(Object::toString).collect(Collectors.joining("\n"));
 			testResponses += "\nAvarage = "
 					+ results.stream().mapToDouble(r -> r.getDuration().toMillis()).average().orElse(0.0);
 
 			logger.info(testResponses);
-			FileHelper.write("SQS_Receive_test_", testResponses);
+			FileHelper.write("SQS_test_", testResponses);
 
 			logger.info("Receive tests successfully completed.");
 		} catch (AmazonServiceException ase) {
@@ -83,47 +85,20 @@ public class SQSTester {
 		}
 	}
 
-	private void writeTest(AmazonSQSClient amazonSQSClient) {
-
-		try {
-			List<SQSWriteResponse> results = Stream.generate(() -> sendOneTestMessage(amazonSQSClient)).limit(AMOUNT)
-					.collect(Collectors.toList());
-
-			String testResponses = results.stream().map(Object::toString).collect(Collectors.joining("\n"));
-			testResponses += "\nAvarage = "
-					+ results.stream().mapToDouble(r -> r.getDuration().toMillis()).average().orElse(0.0);
-
-			logger.info(testResponses);
-			FileHelper.write("SQS_write_test_", testResponses);
-
-			logger.info("writing tests successfully completed.");
-		} catch (AmazonServiceException ase) {
-			logger.error("Error Message:    " + ase.getMessage());
-			logger.error("HTTP Status Code: " + ase.getStatusCode());
-			logger.error("AWS Error Code:   " + ase.getErrorCode());
-			logger.error("Error Type:       " + ase.getErrorType());
-			logger.error("Request ID:       " + ase.getRequestId());
-			logger.error("AmazonServiceException", ase);
-		} catch (AmazonClientException ace) {
-			logger.error("Error Message: " + ace.getMessage());
-			logger.error("AmazonClientException", ace);
-		}
-	}
-
-	private SQSWriteResponse sendOneTestMessage(AmazonSQSClient amazonSQSClient) {
+	private SQSResponseWrite sendOneTestMessage(AmazonSQSClient amazonSQSClient) {
 		Instant start = Instant.now();
 		SendMessageResult messageResult = amazonSQSClient
 				.sendMessage(new SendMessageRequest(QUEUEURL, "Testing response delay."));
 		Instant end = Instant.now();
-		return new SQSWriteResponse(messageResult, Duration.between(start, end));
+		return new SQSResponseWrite(messageResult, Duration.between(start, end));
 	}
 
-	private SQSReceiveResponse requestOneTestMessage(AmazonSQSClient amazonSQSClient) {
+	private SQSResponseReceive requestOneTestMessage(AmazonSQSClient amazonSQSClient) {
 		Instant start = Instant.now();
 		List<Message> messages = amazonSQSClient
 				.receiveMessage(new ReceiveMessageRequest(QUEUEURL).withMaxNumberOfMessages(1)).getMessages();
 		Instant end = Instant.now();
 		Message resultMessage = messages.stream().findFirst().orElse(new Message());
-		return new SQSReceiveResponse(resultMessage, Duration.between(start, end));
+		return new SQSResponseReceive(resultMessage, Duration.between(start, end));
 	}
 }

@@ -14,9 +14,9 @@ public class FileHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(SQSTester.class);
 
-	static void write(String content) {
+	static void write(String fileName,String content) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-MMM-uuuu HH:mm:ss");
-		String file = "SQS_write_test_" + formatter.format(LocalDateTime.now()) + ".txt";
+		String file = fileName + formatter.format(LocalDateTime.now()) + ".txt";
 		logger.info("Writing result file {} ", file);
 		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(file))) {
 			writer.write(content);

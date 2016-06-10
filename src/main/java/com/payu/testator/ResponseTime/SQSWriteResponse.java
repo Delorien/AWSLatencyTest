@@ -4,12 +4,12 @@ import java.time.Duration;
 
 import com.amazonaws.services.sqs.model.SendMessageResult;
 
-public class SQSResponse {
+public class SQSWriteResponse {
 
 	private SendMessageResult messageResult;
 	private Duration duration;
 
-	public SQSResponse(SendMessageResult messageResult, Duration duration) {
+	public SQSWriteResponse(SendMessageResult messageResult, Duration duration) {
 		this.messageResult = messageResult;
 		this.duration = duration;
 	}

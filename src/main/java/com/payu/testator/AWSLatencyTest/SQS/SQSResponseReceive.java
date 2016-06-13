@@ -3,8 +3,9 @@ package com.payu.testator.AWSLatencyTest.SQS;
 import java.time.Duration;
 
 import com.amazonaws.services.sqs.model.Message;
+import com.payu.testator.AWSLatencyTest.LatencyTestResponse;
 
-public class SQSResponseReceive extends SQSResponse {
+public class SQSResponseReceive extends LatencyTestResponse {
 
 	private Message message;
 

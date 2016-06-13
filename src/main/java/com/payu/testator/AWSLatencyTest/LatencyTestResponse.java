@@ -1,12 +1,12 @@
-package com.payu.testator.AWSLatencyTest.SQS;
+package com.payu.testator.AWSLatencyTest;
 
 import java.time.Duration;
 
-public abstract class SQSResponse {
+public abstract class LatencyTestResponse {
 
 	protected Duration duration;
 
-	public SQSResponse(Duration duration) {
+	public LatencyTestResponse(Duration duration) {
 		this.duration = duration;
 	}
 

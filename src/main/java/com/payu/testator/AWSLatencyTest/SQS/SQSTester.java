@@ -2,44 +2,31 @@ package com.payu.testator.AWSLatencyTest.SQS;
 
 import static com.amazonaws.regions.Region.getRegion;
 import static com.amazonaws.regions.Regions.US_EAST_1;
-import static com.payu.testator.AWSLatencyTest.PropertieKeys.QUEUE_AMOUNT_TEST;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.services.sqs.AmazonSQSClient;
 import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageResult;
-import com.payu.testator.AWSLatencyTest.AWSHelper;
+import com.payu.testator.AWSLatencyTest.AWSTester;
 import com.payu.testator.AWSLatencyTest.FileHelper;
+import com.payu.testator.AWSLatencyTest.LatencyTestResponse;
 import com.payu.testator.AWSLatencyTest.PropertieKeys;
 import com.payu.testator.AWSLatencyTest.PropertiesLoader;
 
-public class SQSTester {
+public class SQSTester extends AWSTester {
 
 	private static final String QUEUEURL = PropertiesLoader.get(PropertieKeys.QUEUEURL.getKey());
-	private static final String DEFAULT_AMOUNT = "5";
-	private static final Long AMOUNT;
-
-	static {
-		AMOUNT = Long.valueOf(Optional.ofNullable(PropertiesLoader.get(QUEUE_AMOUNT_TEST.getKey()))
-				.filter(s -> !s.isEmpty()).orElse(DEFAULT_AMOUNT));
-	}
-
-	private final Logger logger = LoggerFactory.getLogger(SQSTester.class);
 
 	public void runWriteTest() {
 		logger.info("===========================================");
@@ -47,9 +34,12 @@ public class SQSTester {
 		logger.info("Sending a messages to Queue: {} ", QUEUEURL);
 		logger.info("===========================================\n");
 
-		Optional<AWSCredentials> credentials = new AWSHelper().getCredentials();
-		credentials.ifPresent(c -> executeTest(
-				() -> sendOneTestMessage(AmazonSQSClientBuilder.build(c, s -> s.setRegion(getRegion(US_EAST_1))))));
+		credentials
+				.ifPresent(
+						c -> executeTest(
+								() -> sendOneTestMessage(
+										SQSClientBuilder.build(c, s -> s.setRegion(getRegion(US_EAST_1)))),
+								"write"));
 	}
 
 	public void runReceiveTest() {
@@ -58,22 +48,25 @@ public class SQSTester {
 		logger.info("Receiving messages from: {} ", QUEUEURL);
 		logger.info("===========================================\n");
 
-		Optional<AWSCredentials> credentials = new AWSHelper().getCredentials();
-		credentials.ifPresent(c -> executeTest(
-				() -> requestOneTestMessage(AmazonSQSClientBuilder.build(c, s -> s.setRegion(getRegion(US_EAST_1))))));
+		credentials
+				.ifPresent(
+						c -> executeTest(
+								() -> requestOneTestMessage(
+										SQSClientBuilder.build(c, s -> s.setRegion(getRegion(US_EAST_1)))),
+								"receive"));
 	}
 
-	private void executeTest(Supplier<SQSResponse> supplier) {
+	private void executeTest(Supplier<LatencyTestResponse> supplier, String name) {
 
 		try {
-			List<SQSResponse> results = Stream.generate(supplier).limit(AMOUNT).collect(Collectors.toList());
+			List<LatencyTestResponse> results = Stream.generate(supplier).limit(AMOUNT).collect(toList());
 
-			String testResponses = results.stream().map(Object::toString).collect(Collectors.joining("\n"));
+			String testResponses = results.stream().map(Object::toString).collect(joining("\n"));
 			testResponses += "\nAvarage = "
 					+ results.stream().mapToDouble(r -> r.getDuration().toMillis()).average().orElse(0.0);
 
 			logger.info(testResponses);
-			FileHelper.write("SQS_test_", testResponses);
+			FileHelper.write("SQS_test_" + name + "_", testResponses);
 
 			logger.info("Receive tests successfully completed.");
 		} catch (AmazonServiceException ase) {

@@ -2,7 +2,7 @@ package com.payu.testator.AWSLatencyTest;
 
 public enum PropertieKeys {
 
-	QUEUEURL("queue.url"), QUEUE_AMOUNT_TEST("queue.amountTest");
+	QUEUEURL("queue.url"), AMOUNT_TEST("queue.amountTest"), BUCKET("bucket.name");
 
 	private String key;
 

@@ -10,9 +10,9 @@ public class S3ClientBuilder {
 
 	public static AmazonS3Client build(AWSCredentials credentials,
 			AmazonWebServiceClientSetter... amazonWebServiceClientSetters) {
-		final AmazonS3Client AmazonS3Client = new AmazonS3Client(credentials);
+		final AmazonS3Client amazonS3Client = new AmazonS3Client(credentials);
 
-		Stream.of(amazonWebServiceClientSetters).forEach(s -> s.accept(AmazonS3Client));
-		return AmazonS3Client;
+		Stream.of(amazonWebServiceClientSetters).forEach(s -> s.accept(amazonS3Client));
+		return amazonS3Client;
 	}
 }

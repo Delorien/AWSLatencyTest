@@ -11,11 +11,9 @@ import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.payu.testator.AWSLatencyTest.SQS.SQSTester;
-
 public class FileHelper {
 
-	private static final Logger logger = LoggerFactory.getLogger(SQSTester.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileHelper.class);
 
 	public static void write(String fileName, String content) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-MMM-uuuu HH:mm:ss");

@@ -1,4 +1,4 @@
-package com.payu.testator.AWSLatencyTest;
+package com.payu.testator.AWSLatencyTest.SQS;
 
 import static com.amazonaws.regions.Region.getRegion;
 import static com.amazonaws.regions.Regions.US_EAST_1;
@@ -23,6 +23,10 @@ import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.amazonaws.services.sqs.model.SendMessageResult;
+import com.payu.testator.AWSLatencyTest.AWSHelper;
+import com.payu.testator.AWSLatencyTest.FileHelper;
+import com.payu.testator.AWSLatencyTest.PropertieKeys;
+import com.payu.testator.AWSLatencyTest.PropertiesLoader;
 
 public class SQSTester {
 

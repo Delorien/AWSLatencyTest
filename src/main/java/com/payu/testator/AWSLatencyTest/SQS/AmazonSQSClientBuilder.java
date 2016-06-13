@@ -1,4 +1,4 @@
-package com.payu.testator.AWSLatencyTest;
+package com.payu.testator.AWSLatencyTest.SQS;
 
 import java.util.function.Consumer;
 import java.util.stream.Stream;

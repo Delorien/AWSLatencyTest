@@ -1,4 +1,4 @@
-package com.payu.testator.AWSLatencyTest;
+package com.payu.testator.AWSLatencyTest.SQS;
 
 import java.time.Duration;
 

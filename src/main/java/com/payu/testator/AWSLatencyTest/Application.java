@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.NoSuchElementException;
 
-import com.amazonaws.services.kinesisfirehose.model.InvalidArgumentException;
-
 public class Application {
 
 	private final BufferedReader reader;

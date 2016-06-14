@@ -27,6 +27,14 @@ public class S3Tester extends AWSTester {
 	private static final String BUCKET_NAME = PropertiesLoader.get(PropertieKeys.BUCKET.getKey());
 	private List<File> files = new ArrayList<>();
 
+	public S3Tester(Long amount) {
+		super(amount);
+	}
+
+	public S3Tester() {
+		super();
+	}
+
 	public void runUpload() {
 
 		logger.info("===========================================");

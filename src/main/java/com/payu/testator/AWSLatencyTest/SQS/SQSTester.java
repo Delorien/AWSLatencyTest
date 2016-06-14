@@ -21,6 +21,14 @@ public class SQSTester extends AWSTester {
 
 	private static final String QUEUEURL = PropertiesLoader.get(PropertieKeys.QUEUEURL.getKey());
 
+	public SQSTester() {
+		super();
+	}
+
+	public SQSTester(Long amount) {
+		super(amount);
+	}
+
 	public void runWriteTest() {
 		logger.info("===========================================");
 		logger.info("Starting Amazon SQS Write test");

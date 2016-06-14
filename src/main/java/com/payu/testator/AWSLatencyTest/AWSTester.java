@@ -18,16 +18,16 @@ import com.amazonaws.auth.AWSCredentials;
 
 public abstract class AWSTester {
 
-	protected static final String DEFAULT_AMOUNT = "5";
+	protected static final String DEFAULT_AMOUNT = "0";
 
-	protected static final Long AMOUNT;
+	protected Long amount;
 
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	protected Optional<AWSCredentials> credentials;
 
-	static {
-		AMOUNT = Long.valueOf(Optional.ofNullable(PropertiesLoader.get(AMOUNT_TEST.getKey())).filter(s -> !s.isEmpty())
+	{
+		amount = Long.valueOf(Optional.ofNullable(PropertiesLoader.get(AMOUNT_TEST.getKey())).filter(s -> !s.isEmpty())
 				.orElse(DEFAULT_AMOUNT));
 	}
 
@@ -35,9 +35,14 @@ public abstract class AWSTester {
 		credentials = new AWSHelper().getCredentials();
 	}
 
+	public AWSTester(Long amount) {
+		this();
+		this.amount = amount;
+	}
+
 	protected void simpleTest(Supplier<LatencyTestResponse> supplier, String name) {
 		try {
-			List<LatencyTestResponse> results = Stream.generate(supplier).limit(AMOUNT).collect(toList());
+			List<LatencyTestResponse> results = Stream.generate(supplier).limit(amount).collect(toList());
 			this.print(results, name);
 		} catch (AmazonServiceException ase) {
 			logger.error("Error Message:    " + ase.getMessage());

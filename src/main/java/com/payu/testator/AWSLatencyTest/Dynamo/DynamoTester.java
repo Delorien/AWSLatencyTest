@@ -28,6 +28,14 @@ public class DynamoTester extends AWSTester {
 	private static final String TABLE = PropertiesLoader.get(PropertieKeys.TABLE.getKey());
 	private List<Map<String, AttributeValue>> elements = new ArrayList<>();
 
+	public DynamoTester(Long amount) {
+		super(amount);
+	}
+
+	public DynamoTester() {
+		super();
+	}
+
 	public void runPutTest() {
 		logger.info("===========================================");
 		logger.info("Starting Amazon Dynamo Put test");
